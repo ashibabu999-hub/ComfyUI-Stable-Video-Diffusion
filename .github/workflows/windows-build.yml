@@ -1,0 +1,91 @@
+name: Windows Build and Package
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  windows-build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11']
+        include:
+          - python-version: '3.11'
+            build-portable: true
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Cache pip packages
+      uses: actions/cache@v3
+      with:
+        path: ~\AppData\Local\pip\Cache
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller pytest flake8
+    
+    - name: Run tests
+      run: |
+        python -c "from nodes import NODE_CLASS_MAPPINGS; print('Nodes OK')"
+        python -c "from svd import SVDDiffusion; print('SVD OK')"
+      continue-on-error: true
+    
+    - name: Build portable executable (Python 3.11)
+      if: matrix.build-portable == true
+      run: |
+        pyinstaller --onefile --windowed --name "ComfyUI-SVD" --icon=app.ico __init__.py
+        mkdir -p dist/windows
+        copy dist\ComfyUI-SVD.exe dist\windows\
+      continue-on-error: true
+    
+    - name: Upload Windows Portable
+      if: matrix.build-portable == true && success()
+      uses: actions/upload-artifact@v3
+      with:
+        name: comfyui-svd-windows-portable
+        path: dist/windows/*.exe
+        retention-days: 30
+
+  create-windows-release:
+    needs: windows-build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Download Windows Build
+      uses: actions/download-artifact@v3
+      with:
+        name: comfyui-svd-windows-portable
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          *.exe
+          README.md
+        draft: false
+        prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') }}
+        body: |
+          ## Windows Build
+          - Portable executable for Windows 10/11
+          - No installation required
+          - Includes all dependencies
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
