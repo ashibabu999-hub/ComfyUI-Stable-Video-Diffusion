@@ -1,6 +1,9 @@
 # ComfyUI Stable Video Diffusion
 Easily use Stable Video Diffusion inside ComfyUI!
 
+[![Build and Test](https://github.com/ashibabu999-hub/ComfyUI-Stable-Video-Diffusion/actions/workflows/build.yml/badge.svg)](https://github.com/ashibabu999-hub/ComfyUI-Stable-Video-Diffusion/actions/workflows/build.yml)
+[![Windows Build](https://github.com/ashibabu999-hub/ComfyUI-Stable-Video-Diffusion/actions/workflows/windows-build.yml/badge.svg)](https://github.com/ashibabu999-hub/ComfyUI-Stable-Video-Diffusion/actions/workflows/windows-build.yml)
+
 [![](https://dcbadge.vercel.app/api/server/MfVCahkc2y)](https://discord.gg/MfVCahkc2y)
 
 
