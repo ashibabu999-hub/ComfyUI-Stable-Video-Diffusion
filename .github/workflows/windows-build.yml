@@ -55,7 +55,7 @@ jobs:
     
     - name: Upload Windows Portable
       if: matrix.build-portable == true && success()
-      uses: actions/upload-artifact@v3
+      uses: actions/
       with:
         name: comfyui-svd-windows-portable
         path: dist/windows/*.exe
@@ -70,7 +70,7 @@ jobs:
     - uses: actions/checkout@v3
     
     - name: Download Windows Build
-      uses: actions/download-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: comfyui-svd-windows-portable
     
